@@ -1,6 +1,6 @@
 import hashlib, sys
 
-nrabin = 0x15525796ddab817a3c54c4bea4ef564f090c5909b36818c1c13b9e674cf524aa3387a408f9b63c0d88d11a76471f9f2c3f29c47a637aa60bf5e120d1f5a65221
+nrabin = 0x1541942cc552a95c4832350ce99c2970f5b3ce9237a09c70c0e867d28039c05209b601105d3b3634cdaee4931809bc0c41d6165a0df16829a3a31202f56003239dd2c6e12297e94ef03e6aa61a147ea2b51c476dc45f5a2406b66d1ece2755c1f3d4144c0a42acc99b599d0643654a4cac392efbcf3db84d4233834afd1
 
 def gcd(a,b):
   if b > a:
@@ -71,7 +71,7 @@ def sF(hexmsg):
 def vF(hexmsg, paddingnum, s):
   return hF(bytes.fromhex(hexmsg), paddingnum) == (s * s) % nrabin
  
-print("\n\n rabin signature - sCrypt Inc 2020 adapted from Scheerer - all rights reserved\n\n")
+'''print("\n\n rabin signature - sCrypt Inc 2020 adapted from Scheerer - all rights reserved\n\n")
 print("\n\n rabin signature - copyright Scheerer Software 2018 - all rights reserved\n\n")
 print("First parameter is V (Verify) or S (Sign) or G (Generate)\n\n")
 print("\n\n verify signature (2 parameters):")
@@ -85,7 +85,7 @@ print("   > python rabin.py G <hexseed> \n\n")
 
 print(" number of parameters is " + str(len(sys.argv)-1))
 print(" ")
-print(" ")
+print(" ")'''
 
 if len(sys.argv) == 5 and sys.argv[1] == "V":
   print("result of verification: " + str(vF(sys.argv[2], int(sys.argv[3]), int(sys.argv[4], 16))))

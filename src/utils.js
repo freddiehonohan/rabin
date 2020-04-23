@@ -1,3 +1,5 @@
+const { toBufferLE, toBigIntLE } = require('bigint-buffer');
+
 // Helper functions
 function checkIfValidHexString(hexString) {
     if(typeof hexString !== 'string')
@@ -6,42 +8,24 @@ function checkIfValidHexString(hexString) {
     return re.test(hexString);
 }
 
-function decimalToHexString(number) {
+function decimalToLittleEndianHexString(number) {
     if(typeof(number) !== 'bigint' && isNaN(number))
         throw ("Error: Argument %s should be a Number or BigInt", number);
-
-    if (number < 0) {
-        number = 0xFFFFFFFF + number + 1;
-    }
-    return '0x'+number.toString(16);
+    let length = 1+number.toString(16).length*0.5;// We gotta figure out how long this string will be
+    let hexStr = toBufferLE(number,length).toString('hex');
+    // Strip any final null bytes
+    if(hexStr.endsWith('00'))hexStr = hexStr.slice(0, hexStr.length-2);
+    return '0x'+hexStr;
 }
 
-function hexStringToDecimal(hexString) {
+function littleEndianHexStringToDecimal(hexString){
     if (!checkIfValidHexString(hexString))
         throw ("Error: Hex %s should be hexadecimal with or without '0x' at the beginning.", hexString);
     // Remove 0x from string if necessary
     hexString = hexString.replace('0x', '');
-
-    var i, j, digits = [0],
-        carry;
-    for (i = 0; i < hexString.length; i += 1) {
-        carry = parseInt(hexString.charAt(i), 16);
-        for (j = 0; j < digits.length; j += 1) {
-            digits[j] = digits[j] * 16 + carry;
-            carry = digits[j] / 10 | 0;
-            digits[j] %= 10;
-        }
-        while (carry > 0) {
-            digits.push(carry % 10);
-            carry = carry / 10 | 0;
-        }
-    }
-    return digits.reverse().join('');
+    return toBigIntLE(Buffer.from( hexString, 'hex' ));
 }
 
-function hexStringToBigInt(hexString){
-    return BigInt(hexStringToDecimal(hexString));
-}
 // Test functions
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).
@@ -84,9 +68,8 @@ function bigIntAbsoluteValue(value) {
 
 module.exports = {
     checkIfValidHexString,
-    decimalToHexString,
-    hexStringToDecimal,
-    hexStringToBigInt,
+    decimalToLittleEndianHexString,
+    littleEndianHexStringToDecimal,
     bigIntAbsoluteValue,
     getRandomInt,
     getRandomHex

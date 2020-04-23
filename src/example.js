@@ -5,25 +5,28 @@ const{ generatePrivKey,
     privKeyToPubKey,
     createSignature,
     verifySignature } = require("../src/rabin");
-let crypto;
-try {
-    crypto = require('crypto');
-} catch (err) {
-    console.log('crypto support is disabled!');
-}
 
 let key = generatePrivKey();
+key.p = 48350631645308620106520230355254807825946112706188258977960795041957053249680712772020389545201874875566892889408451647603292731522688575489858158743n;
+key.q = 650047001204168007801848889418948532353073326909497585177081016045346562912146630794965372241635285465610094863279373295872825824127728241709483771067n;
 console.log("key p = "+key.p);
 console.log("key q = "+key.q);
+/*P,Q: 48350631645308620106520230355254807825946112706188258977960795041957053249680712772020389545201874875566892889408451647603292731522688575489858158743, 650047001204168007801848889418948532353073326909497585177081016045346562912146630794965372241635285465610094863279373295872825824127728241709483771067
+nRabin: 0x4d4ac7a2b83b8cf5fce4a3ef329b1476e7772da6857411a4e61215f6099d4ab40c7765b89f1f8fe57d1578400ff9937fdd546eb68950bc3135cc973ca8b6019ac0f13ce2ac53c73adf4e4626f58a0434259a40c22cb220af4517c079a33daea70c9d3f03ef491e1161a25bc851ee4f22e4e6d823a6a185e4b4033cc0
+dataHex: 0x75de258847e9a8f00be911616371f2a645413a1b5824c47fd01e42bfd6c287afa84fcc2e4685c1cf83adbe4fc2b
+sig: 0x6d81bfae69b1532552381131980bee014736dad9e81b945e1afca20df4a3e2b3b73d6773d3f959b420f7f9a775c50d9bfae7ebc135ef8f111b74c693b664392350c65fc31dbcd28b5ddb3e128dddd431682fee3cebfba7540681499675d36f41f7d564ed8846a3ab1802d32cf7f9eb6af60f92552a78bfac14d09d33
+0x0000*/
 let nRabin = privKeyToPubKey(key.p, key.q);
-console.log("key nRabin = "+nRabin);
-
+console.log('nRabin = '+nRabin);
 let dataHex = Buffer.from("msg").toString('hex');
-console.log("dataHex = " + dataHex);
+//dataHex = '00112233445566778899aabbccddeeff'
+console.log("dataHex = 0x" + dataHex);
+// ***
+dataHex = "0x75de258847e9a8f00be911616371f2a645413a1b5824c47fd01e42bfd6c287afa84fcc2e4685c1cf83adbe4fc2b"
 
 let signatureResult = createSignature(dataHex, key.p, key.q, nRabin);
 console.log("Signature = " + signatureResult.signature);
-console.log("Padding Bytes = " + signatureResult.paddingByteCount);
-
+console.log("Padding Byte Count = " + signatureResult.paddingByteCount);
+console.log("Padding Bytes = 0x"+new Array(signatureResult.paddingByteCount*2 + 1).join( '0' ));
 let result = verifySignature(dataHex, signatureResult.paddingByteCount, signatureResult.signature, nRabin);
 console.log("Signature Verified = " + result);

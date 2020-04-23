@@ -4,7 +4,8 @@ from: https://github.com/scrypt-sv/rabin/blob/master/rabin.py
 */
 const { toBigIntLE } = require('bigint-buffer');
 const { checkIfValidHexString,
-    hexStringToBigInt,
+    decimalToLittleEndianHexString,
+    littleEndianHexStringToDecimal,
     bigIntAbsoluteValue } = require('./utils');
 let crypto;
 try {
@@ -96,7 +97,7 @@ function root(dataBuffer, p, q, nRabin) {
         paddingByteCount++;
     }
     return {
-        "signature": sig,
+        "signature": decimalToLittleEndianHexString(sig),
         "paddingByteCount": paddingByteCount
     };
 }
@@ -110,7 +111,7 @@ function root(dataBuffer, p, q, nRabin) {
 function privKeyToPubKey(p,q){
     if(typeof(p) !== 'bigint' || typeof(q) !== 'bigint')
         throw("Error: Key parts (p,q) should be BigInts (denoted by trailing 'n').")
-    return p * q;
+    return decimalToLittleEndianHexString(p * q);
 }
 
 /**
@@ -134,8 +135,8 @@ function generatePrivKey() {
  * @param {String} dataHex Hexadecimal data string value
  * @param {BigInt} p Key 'p' value
  * @param {BigInt} q Key 'q' value
- * @param {BigInt} nRabin Key nRabin value
- * @returns {JSON} {"signature": BigInt, "paddingByteCount": Number} Signature and padding count
+ * @param {String} nRabin Key nRabin value
+ * @returns {JSON} {"signature": String, "paddingByteCount": Number} Signature and padding count
  */
 function createSignature(dataHex, p, q, nRabin) {
     // Check if data is valid hex
@@ -144,9 +145,12 @@ function createSignature(dataHex, p, q, nRabin) {
     // Remove 0x from data if necessary
     dataHex = dataHex.replace('0x', '');
     // Check key parts are correct values
-    if(typeof(p) !== 'bigint' || typeof(q) !== 'bigint' || typeof(nRabin) !== 'bigint')
+    if(typeof(p) !== 'bigint' || typeof(q) !== 'bigint')
         throw("Error: Key parts (p,q) should be BigInts (denoted by trailing 'n').")
-    return root(Buffer.from(dataHex, 'hex'), p, q, nRabin);
+    if(typeof(nRabin) !== 'string')
+        throw("Error: nRabin should be a little endian hex string")
+
+    return root(Buffer.from(dataHex, 'hex'), p, q, littleEndianHexStringToDecimal(nRabin));
 }
 
 /**
@@ -167,18 +171,18 @@ function verifySignature(dataHex, paddingByteCount, signature, nRabin) {
     if(typeof paddingByteCount !== 'number')
         throw ("Error: paddingByteCount should be a number");
     // Check if signature is a BigInt
-    if(typeof(signature) !== 'bigint')
-    throw("Error: Signature should be a BigInt (denoted by trailing 'n').");
+    if(typeof(signature) !== 'string')
+    throw("Error: Signature should be a little endian hex string")
     // Check if nRabin is a BigInt
-    if(typeof(nRabin) !== 'bigint')
-        throw("Error: Public Key nRabin should be a BigInt (denoted by trailing 'n').");
+    if(typeof(nRabin) !== 'string')
+        throw("Error: nRabin should be a little endian hex string")
 
     let dataBuffer = Buffer.from(dataHex, 'hex');
     let paddingBuffer = Buffer.from('00'.repeat(paddingByteCount), 'hex');
     let paddedDataBuffer = Buffer.concat([dataBuffer, paddingBuffer]);
     let dataHash = rabinHashBytes(paddedDataBuffer);
-    let hashMod = dataHash % nRabin;
-    return hashMod === (signature ** 2n % nRabin);
+    let hashMod = dataHash % littleEndianHexStringToDecimal(nRabin);
+    return hashMod === (littleEndianHexStringToDecimal(signature) ** 2n % littleEndianHexStringToDecimal(nRabin));
 }
 
 module.exports = {

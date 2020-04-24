@@ -11,7 +11,7 @@ function checkIfValidHexString(hexString) {
 function decimalToLittleEndianHexString(number) {
     if(typeof(number) !== 'bigint' && isNaN(number))
         throw ("Error: Argument %s should be a Number or BigInt", number);
-    let length = 1+number.toString(16).length*0.5;// We gotta figure out how long this string will be
+    let length = 1+number.toString(16).length*0.5;// We gotta estimate the length of the buffer
     let hexStr = toBufferLE(number,length).toString('hex');
     // Strip any final null bytes
     if(hexStr.endsWith('00'))hexStr = hexStr.slice(0, hexStr.length-2);
@@ -25,7 +25,6 @@ function littleEndianHexStringToDecimal(hexString){
     hexString = hexString.replace('0x', '');
     return toBigIntLE(Buffer.from( hexString, 'hex' ));
 }
-
 // Test functions
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).

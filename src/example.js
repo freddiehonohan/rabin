@@ -5,12 +5,6 @@ const{ generatePrivKey,
     privKeyToPubKey,
     sign,
     verify } = require("../src/rabin");
-let crypto;
-try {
-    crypto = require('crypto');
-} catch (err) {
-    console.log('crypto support is disabled!');
-}
 
 let key = generatePrivKey();
 console.log("key p = "+key.p);

@@ -23,7 +23,7 @@ describe("Create Signature Tests", function() {
           expect(function(){sign(defaultDataHex, defaultKey.p, defaultNotHexValue, defaultNRabin);}).to.throw("Error: Key parts (p,q) should be BigInts (denoted by trailing \'n\').");
         });
         it("Wrong nRabin value", function() {
-          expect(function(){sign(defaultDataHex, defaultKey.p, defaultKey.q, defaultNotHexValue);}).to.throw("Error: Key parts (p,q) should be BigInts (denoted by trailing \'n\').");
+          expect(function(){sign(defaultDataHex, defaultKey.p, defaultKey.q, defaultNotHexValue);}).to.throw(defaultNotHexValue);
         });
     });
 });
